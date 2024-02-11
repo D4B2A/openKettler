@@ -4,11 +4,14 @@
 #define POTIPIN A0
 #define TRIGGERTOLERANCE 20
 #define TRIGGERDELAY 500
+#define CYVLEDELAY 5
+
 #define STOPTOLERANCE 10
 
 unsigned long lastMillis;
 int currentMotorState;
 int sollWert;
+int lastCycle;
 
 enum motorState {
   FORWARDS,
@@ -51,15 +54,19 @@ void updateMotor() {
   unsigned int timeDelta = millis() - lastMillis;
   //Serial.println(delta);
   
-  if(delta>TRIGGERTOLERANCE&&timeDelta>TRIGGERDELAY) {
+  if(delta>TRIGGERTOLERANCE&&timeDelta>TRIGGERDELAY&&lastCycle>CYCLEDELAY) {
     setMotorState(FORWARDS);
   }
-  if(delta<-TRIGGERTOLERANCE&&timeDelta>TRIGGERDELAY) {
+  if(delta<-TRIGGERTOLERANCE&&timeDelta>TRIGGERDELAY&&lastCYCLEDELAY) {
     setMotorState(BACKWARDS);  
   }
   if(delta<STOPTOLERANCE&&delta>-STOPTOLERANCE) {
     lastMillis = millis();
     setMotorState(STOPP);
+    lastCycle = 0;
+  }
+  else {
+    lastCycle += 1;
   }
 }
 
