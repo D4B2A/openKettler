@@ -15,13 +15,8 @@ int sollWert;
 int lastCycle;
 bool changedSollWert;
 
-=======
 #define TRIGGERTOLERANCE 50
 #define STOPTOLERANCE 20
-
-
-int currentMotorState;
-int sollWert;
 
 
 enum motorState {
@@ -37,7 +32,7 @@ void setup() {
   sollWert = 200;
 
   changedSollWert = true;
-  delayMillis = millis();
+  lastMillis = millis();
   
   Serial.begin(9600);
   Serial.setTimeout(10);
@@ -79,7 +74,7 @@ void updateMotor() {
   if(delta>TRIGGERTOLERANCE&&timeDelta>TRIGGERDELAY&&lastCycle>CYCLEDELAY) {
     setMotorState(FORWARDS);
   }
-  if(delta<-TRIGGERTOLERANCE&&timeDelta>TRIGGERDELAY&&lastCYCLEDELAY) {
+  if(delta<-TRIGGERTOLERANCE&&timeDelta>TRIGGERDELAY&&lastCycle>CYCLEDELAY) {
     setMotorState(BACKWARDS);  
   }
   if(delta<STOPTOLERANCE&&delta>-STOPTOLERANCE) {
@@ -102,7 +97,7 @@ void updateMotor() {
     setMotorState(STOPP);
   }
 }
-
+}
 
 
 void serialEvent() {
