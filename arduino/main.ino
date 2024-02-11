@@ -2,10 +2,11 @@
 #define PINA 3
 #define PINB 4
 #define POTIPIN A0
-#define TRIGGERTOLERANCE 50
-#define STOPTOLERANCE 20
+#define TRIGGERTOLERANCE 20
+#define TRIGGERDELAY 500
+#define STOPTOLERANCE 10
 
-
+unsigned long lastMillis;
 int currentMotorState;
 int sollWert;
 
@@ -20,8 +21,13 @@ void setup() {
   // put your setup code here, to run once:
   currentMotorState = STOPP;
   sollWert = 200;
+  delayMillis = millis();
+  
   Serial.begin(9600);
   Serial.setTimeout(10);
+
+  
+  
   pinMode(ENABLEPIN, OUTPUT);
   pinMode(PINA, OUTPUT);
   pinMode(PINB, OUTPUT);
@@ -42,16 +48,17 @@ void updateMotor() {
   int istWert = analogRead(POTIPIN);
   int delta = istWert-sollWert;
 
+  unsigned int timeDelta = millis() - lastMillis;
   //Serial.println(delta);
   
-  if(delta>TRIGGERTOLERANCE) {
+  if(delta>TRIGGERTOLERANCE&&timeDelta>TRIGGERDELAY) {
     setMotorState(FORWARDS);
   }
-  if(delta<-TRIGGERTOLERANCE) {
+  if(delta<-TRIGGERTOLERANCE&&timeDelta>TRIGGERDELAY) {
     setMotorState(BACKWARDS);  
   }
   if(delta<STOPTOLERANCE&&delta>-STOPTOLERANCE) {
-    //Serial.println("STOPP");
+    lastMillis = millis();
     setMotorState(STOPP);
   }
 }
