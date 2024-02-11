@@ -13,6 +13,7 @@
 
 unsigned long lastMillis;
 int currentMotorState;
+int currentHeadUnitState;
 int sollWert;
 int lastCycle;
 bool changedSollWert;
@@ -32,6 +33,15 @@ enum motorState {
   STOPP,
   BACKWARDS
   };
+
+enum headUnitState {
+  BRAKELEVEL_SIMPLE,
+  BRAKELEVEL_COMPLEX,
+  TIME,
+  DISTANCE,
+  CALORIES
+};
+
 
 void setup() {
   // put your setup code here, to run once:
@@ -166,8 +176,14 @@ void updateBrakeLevel(unsigned char level) {
 ISR() {
   //Validate Interrupt
   if(digitalRead(ROT+PIN)) {
-    if(brakeLevel<BRAKELEVEL){
-      brakeLevel += 1;
+    switch(currentHeadUnitState){
+      case BRAKELEVEL_SIMPLE:
+      if(brakeLevel<BRAKELEVEL){
+        brakeLevel += 1;
+      }
+      break;
+      default:
+      break;
     }
   }
 }
@@ -176,8 +192,12 @@ ISR() {
 ISR() {
   //Validate Interrupt
   if(digitalRead(ROT-PIN)) {
-    if(brakeLevel>0) {
-      brakeLevel -= 1;
+    switch(currentHeadUnitState) {
+      case: BRAKELEVEL_SIMPLE:
+      if(brakeLevel>0) {
+        brakeLevel -= 1;
+      }
+      break;
     }
   }
   
