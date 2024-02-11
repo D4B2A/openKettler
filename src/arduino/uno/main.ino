@@ -2,6 +2,8 @@
 #define PINA 3
 #define PINB 4
 #define POTIPIN A0
+#define ROT+PIN 5
+#define ROT-PIN 6
 
 #define TRIGGERTOLERANCE 20
 #define TRIGGERDELAY 500
@@ -14,10 +16,15 @@ int currentMotorState;
 int sollWert;
 int lastCycle;
 bool changedSollWert;
+unsigned char brakeLevel;
 
 #define TRIGGERTOLERANCE 50
 #define STOPTOLERANCE 20
 
+
+#define BRAKELEVEL 12
+#define LOWLIMIT 50
+#define HIGHLIMIT 500
 
 enum motorState {
   FORWARDS,
@@ -45,7 +52,8 @@ void setup() {
   pinMode(PINA, OUTPUT);
   pinMode(PINB, OUTPUT);
   pinMode(POTIPIN, INPUT);
-  setMotorState(FORWARDS);
+  pinMode(ROT+PIN, INPUT);
+  pinMode(ROT-PIN, INPUT);
 
 }
 
@@ -145,3 +153,32 @@ void setMotorState(int state) {
       }
     }
   }
+
+void updateBrakeLevel(unsigned char level) {
+  //12 Brake Level
+  //validate Level
+  if(level<=BRAKELEVEL) {
+    sollWert = map(level, 1, BRAKELEVEL, LOWLIMIT, HIGHLIMIT);
+  }
+}
+
+//BrakeLevel++
+ISR() {
+  //Validate Interrupt
+  if(digitalRead(ROT+PIN)) {
+    if(brakeLevel<BRAKELEVEL){
+      brakeLevel += 1;
+    }
+  }
+}
+
+//BrakeLevel--
+ISR() {
+  //Validate Interrupt
+  if(digitalRead(ROT-PIN)) {
+    if(brakeLevel>0) {
+      brakeLevel -= 1;
+    }
+  }
+  
+}
