@@ -2,6 +2,7 @@
 #define PINA 3
 #define PINB 4
 #define POTIPIN A0
+
 #define TRIGGERTOLERANCE 20
 #define TRIGGERDELAY 500
 #define CYCLEDELAY 5
@@ -13,6 +14,14 @@ int currentMotorState;
 int sollWert;
 int lastCycle;
 bool changedSollWert;
+
+=======
+#define TRIGGERTOLERANCE 50
+#define STOPTOLERANCE 20
+
+
+int currentMotorState;
+int sollWert;
 
 
 enum motorState {
@@ -26,6 +35,7 @@ void setup() {
   // put your setup code here, to run once:
   currentMotorState = STOPP;
   sollWert = 200;
+
   changedSollWert = true;
   delayMillis = millis();
   
@@ -34,6 +44,8 @@ void setup() {
 
   
   
+  Serial.begin(9600);
+  Serial.setTimeout(10);
   pinMode(ENABLEPIN, OUTPUT);
   pinMode(PINA, OUTPUT);
   pinMode(PINB, OUTPUT);
@@ -53,6 +65,7 @@ void loop() {
 void updateMotor() {
   int istWert = analogRead(POTIPIN);
   int delta = istWert-sollWert;
+
 
   unsigned int timeDelta = millis() - lastMillis;
   //Serial.println(delta);
@@ -76,6 +89,17 @@ void updateMotor() {
   }
   else {
     lastCycle += 1;
+  //Serial.println(delta);
+  
+  if(delta>TRIGGERTOLERANCE) {
+    setMotorState(FORWARDS);
+  }
+  if(delta<-TRIGGERTOLERANCE) {
+    setMotorState(BACKWARDS);  
+  }
+  if(delta<STOPTOLERANCE&&delta>-STOPTOLERANCE) {
+    //Serial.println("STOPP");
+    setMotorState(STOPP);
   }
 }
 
@@ -89,7 +113,9 @@ void serialEvent() {
     }
   if(0<dataIn<=1023){
     sollWert = dataIn;
+
     changedSollWert = true;
+    
   }
   else {
     Serial.println("Sollwert außerhalb des Messbereichs");
