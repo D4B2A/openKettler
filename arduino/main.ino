@@ -4,7 +4,7 @@
 #define POTIPIN A0
 #define TRIGGERTOLERANCE 20
 #define TRIGGERDELAY 500
-#define CYVLEDELAY 5
+#define CYCLEDELAY 5
 
 #define STOPTOLERANCE 10
 
@@ -12,6 +12,8 @@ unsigned long lastMillis;
 int currentMotorState;
 int sollWert;
 int lastCycle;
+bool changedSollWert;
+
 
 enum motorState {
   FORWARDS,
@@ -24,6 +26,7 @@ void setup() {
   // put your setup code here, to run once:
   currentMotorState = STOPP;
   sollWert = 200;
+  changedSollWert = true;
   delayMillis = millis();
   
   Serial.begin(9600);
@@ -53,6 +56,12 @@ void updateMotor() {
 
   unsigned int timeDelta = millis() - lastMillis;
   //Serial.println(delta);
+
+  if(changedSollWert) {
+    //change values to allow for trigger
+    timeDelta += TRIGGERDELAY + 1;
+    lastCycle += CYCLEDELAY + 1;
+  }
   
   if(delta>TRIGGERTOLERANCE&&timeDelta>TRIGGERDELAY&&lastCycle>CYCLEDELAY) {
     setMotorState(FORWARDS);
@@ -80,6 +89,7 @@ void serialEvent() {
     }
   if(0<dataIn<=1023){
     sollWert = dataIn;
+    changedSollWert = true;
   }
   else {
     Serial.println("Sollwert außerhalb des Messbereichs");
