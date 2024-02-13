@@ -11,7 +11,7 @@ This file contains the different pinouts for all wire to board connections.
 | 5 | Unknown |
 | 6 | Unknown |
 | 7 | Unknown |
-| 8 | Unused |
+| 8 | +5V |
 | 9 | Poti Value |
 | 10 | GND |
 | 11 | Motor + |
