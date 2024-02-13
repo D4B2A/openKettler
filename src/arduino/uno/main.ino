@@ -14,14 +14,26 @@
 unsigned long lastMillis;
 int currentMotorState;
 int currentHeadUnitState;
-int sollWert;
-int lastCycle;
-bool changedSollWert;
 unsigned char brakeLevel;
+
+int currentPosition;
+int currentDebugState;
+String inputString;
+bool stringComplete;
+
+int debugFunctionStep;
+int target_pos;
+int lastCycle;
+bool changedtarget_pos;
 
 #define TRIGGERTOLERANCE 50
 #define STOPTOLERANCE 20
 
+enum debugState {
+  OFF,
+  MANUALMOTORCONTROLL,
+  AUTOMATICMOTORTEST
+};
 
 #define BRAKELEVEL 12
 #define LOWLIMIT 50
@@ -44,11 +56,16 @@ enum headUnitState {
 
 
 void setup() {
-  // put your setup code here, to run once:
-  currentMotorState = STOPP;
-  sollWert = 200;
+  //inti debug
+  currentDebugState = OFF;
+  inputString = "";
+  debugFunctionStep = 0;
 
-  changedSollWert = true;
+
+  currentMotorState = STOPP;
+  target_pos = 200;
+
+  changedtarget_pos = true;
   lastMillis = millis();
   
   Serial.begin(9600);
@@ -65,25 +82,24 @@ void setup() {
   pinMode(ROT+PIN, INPUT);
   pinMode(ROT-PIN, INPUT);
 
+
+  currentPosition = analogRead(POTIPIN);
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-  Serial.print(analogRead(POTIPIN));
-  Serial.print(",");
-  Serial.println(sollWert);
   updateMotor();
+  debugFunction();
 }
 
 void updateMotor() {
-  int istWert = analogRead(POTIPIN);
-  int delta = istWert-sollWert;
+  currentPosition = analogRead(POTIPIN);
+  int delta = currentPosition-target_pos;
 
 
   unsigned int timeDelta = millis() - lastMillis;
   //Serial.println(delta);
 
-  if(changedSollWert) {
+  if(changedtarget_pos) {
     //change values to allow for trigger
     timeDelta += TRIGGERDELAY + 1;
     lastCycle += CYCLEDELAY + 1;
@@ -102,36 +118,77 @@ void updateMotor() {
   }
   else {
     lastCycle += 1;
-  //Serial.println(delta);
   
-  if(delta>TRIGGERTOLERANCE) {
-    setMotorState(FORWARDS);
+    if(delta>TRIGGERTOLERANCE) {
+      setMotorState(FORWARDS);
+    }
+    if(delta<-TRIGGERTOLERANCE) {
+      setMotorState(BACKWARDS);  
+    }
+    if(delta<STOPTOLERANCE&&delta>-STOPTOLERANCE) {
+      setMotorState(STOPP);
+    }
   }
-  if(delta<-TRIGGERTOLERANCE) {
-    setMotorState(BACKWARDS);  
-  }
-  if(delta<STOPTOLERANCE&&delta>-STOPTOLERANCE) {
-    //Serial.println("STOPP");
-    setMotorState(STOPP);
-  }
-}
 }
 
 
 void serialEvent() {
-  int dataIn = Serial.parseInt(SKIP_ALL);
-  //Serial.println(dataIn);
-  if(dataIn==0) {
-    return;
+  while(Serial.available) {
+    int inChar = Serial.read();
+    inputString += (char)inChar;
+    if(inChar == "\n"){
+      stringComplete = true;
+      inputString = inputString.toUpperCase();
+      break;
     }
-  if(0<dataIn<=1023){
-    sollWert = dataIn;
-
-    changedSollWert = true;
-    
   }
-  else {
-    Serial.println("Sollwert außerhalb des Messbereichs");
+  //Change Debug Mode --> Global functions
+  String functionToken = getDebugToken(inputString, 0);
+  switch(functionToken){
+    case "EXIT":
+      //Provide Feedback
+      if(currentDebugState != OFF) {
+        Serial.println("Exited debug programm");
+      }
+      else {
+        Serial.println("You're not in a debug programm")
+      }
+      currentDebugState = OFF;
+      break;
+    case "MANUALMOTORCONTROLL":
+      //provide feedback
+      if(currentDebugState != MANUALMOTORCONTROLL) {
+        Serial.println("Starting MANUALMOTORCONTROLL");
+      }
+      else {
+        Serial.println("You're allready in MANUALMOTORCONTROLL");
+      }
+      currentDebugState = MANUALMOTORCONTROLL;
+      break;
+    case: "AUTOMATICMOTORTEST":
+      if(currentDebugState!=AUTOMATICMOTORTEST){
+        Serial.println("Starting AUTOMATICMOTORTEST");
+      }
+      else {
+        Serial.println("You're allready in AUTOMATICMOTORTEST");
+      }
+      currentDebugState = AUTOMATICMOTORTEST;
+    default:
+      break;
+  }
+
+
+  //Execute Debug Mode Input
+  switch(currentDebugState){
+    case MANUALMOTORCONTROLL:
+      int dataIn = toInt(getDebugToken(inputString,0));
+      if(!setTargetPos(dataIn)){
+        Serial.println("target position outside allowed borders");
+      }
+      break;
+    default:
+      //do nothing
+      break;
   }
 }
 
@@ -164,11 +221,12 @@ void setMotorState(int state) {
     }
   }
 
+
 void updateBrakeLevel(unsigned char level) {
   //12 Brake Level
   //validate Level
   if(level<=BRAKELEVEL) {
-    sollWert = map(level, 1, BRAKELEVEL, LOWLIMIT, HIGHLIMIT);
+    target_pos = map(level, 1, BRAKELEVEL, LOWLIMIT, HIGHLIMIT);
   }
 }
 
@@ -201,4 +259,76 @@ ISR() {
     }
   }
   
+}
+
+String getDebugToken(String inputString, int TokenIndex) {
+  int length = inputString.length();
+  int currentIndex = 0;
+  bool isToken = false;
+  String OutputString = "";
+  for(int i = 0; i<length; i++) {
+    if(inputString[i]==" ") {
+      //just count one blank
+      if(isToken){
+        currentIndex += 1;
+        if(currentIndex>TokenIndex){
+          return OutputString;
+        }
+      }
+    }
+    else {
+      isToken = true;
+      if(currentIndex==TokenIndex){
+        OutputString += inputString[i];
+      }
+    }
+  }
+}
+
+
+void debugFunction() {
+  switch(currentDebugState) {
+    case MANUALMOTORCONTROLL:
+      Serial.print("current position:");
+      Serial.print(analogRead(POTIPIN));
+      Serial.print(", target position:");
+      Serial.println(target_pos);
+      break;
+    case AUTOMATICMOTORTEST:
+      //Send Serial Data
+      Serial.print("current position:");
+      Serial.print(analogRead(POTIPIN));
+      Serial.print(", target position:");
+      Serial.println(target_pos);
+
+      switch(debugFunctionStep) {
+        case 0:
+          //Move to lowest position
+          setTargetPos(50);
+          if(isAtTargetPos()) {
+            debugFunctionStep = 1;
+          }
+          break;
+        case 1:
+          setTargetPos();
+      }
+    default:
+      //Do nothing
+      break;
+  }
+}
+
+bool setTargetPos(int newTargetPos) {
+  if(0<newTargetPos<1024) {
+    target_pos = newTargetPos;
+    changedtarget_pos = true;
+    //return true to indicate successful set
+    return true;
+  }
+  //an error happend
+  return false;
+}
+
+bool isAtTargetPos() {
+  return currentPosition>target_pos-TRIGGERTOLERANCE&&currentPosition<target_pos+TRIGGERTOLERANCE
 }
