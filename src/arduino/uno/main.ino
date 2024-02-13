@@ -11,7 +11,10 @@
 
 #define STOPTOLERANCE 10
 
+#define MOTORTIMEOUT 10000
+
 unsigned long lastMillis;
+unsigned long timeoutMillis;
 int currentMotorState;
 int currentHeadUnitState;
 unsigned char brakeLevel;
@@ -21,6 +24,7 @@ int currentDebugState;
 String inputString;
 bool stringComplete;
 
+int error;
 int debugFunctionStep;
 int target_pos;
 int lastCycle;
@@ -28,6 +32,10 @@ bool changedtarget_pos;
 
 #define TRIGGERTOLERANCE 50
 #define STOPTOLERANCE 20
+
+enum errorEnum {
+  MOTORTIMEOUT
+};
 
 enum debugState {
   OFF,
@@ -303,14 +311,33 @@ void debugFunction() {
 
       switch(debugFunctionStep) {
         case 0:
+          Serial.println("Starting Test");
+          debugFunctionStep += 1;
+          setTimeout(MOTORTIMEOUT);
+        case 1:
           //Move to lowest position
-          setTargetPos(50);
+          setTargetPos(LOWLIMIT);
+          if(checkTimeout) {
+            Serial.println("Motortimeout triggered during autotest");
+            error = MOTORTIMEOUT;
+            currentDebugState = OFF;
+          }
           if(isAtTargetPos()) {
-            debugFunctionStep = 1;
+            debugFunctionStep += 1;
+            setTimeout(MOTORTIMEOUT);
           }
           break;
-        case 1:
-          setTargetPos();
+        case 2:
+          //Move to highest position
+          setTargetPos(HIGHLIMIT);
+          if(checkTimeout) {
+            Serial.println("Motortimeout triggered during autotest")
+            errror = MOTORTIMEOUT;
+            currentDebugState = OFF;
+          }
+          if(isAtTargetPos()) {
+            debugFunctionStep += 1;
+          }
       }
     default:
       //Do nothing
@@ -319,7 +346,7 @@ void debugFunction() {
 }
 
 bool setTargetPos(int newTargetPos) {
-  if(0<newTargetPos<1024) {
+  if(LOWLIMIT<newTargetPos<HIGHLIMIT) {
     target_pos = newTargetPos;
     changedtarget_pos = true;
     //return true to indicate successful set
@@ -331,4 +358,12 @@ bool setTargetPos(int newTargetPos) {
 
 bool isAtTargetPos() {
   return currentPosition>target_pos-TRIGGERTOLERANCE&&currentPosition<target_pos+TRIGGERTOLERANCE
+}
+
+void setTimeout(int timeout) {
+  timeoutMillis = millis() + timeout;
+}
+
+bool checkTimeout() {
+  return timeoutMillis>millis();
 }
