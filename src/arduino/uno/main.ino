@@ -11,6 +11,7 @@
 
 unsigned long lastMillis;
 int currentMotorState;
+int currentPosition;
 int currentDebugState;
 String inputString;
 bool stringComplete;
@@ -62,6 +63,8 @@ void setup() {
   pinMode(POTIPIN, INPUT);
   setMotorState(FORWARDS);
 
+
+  currentPosition = analogRead(POTIPIN);
 }
 
 void loop() {
@@ -70,8 +73,8 @@ void loop() {
 }
 
 void updateMotor() {
-  int istWert = analogRead(POTIPIN);
-  int delta = istWert-target_pos;
+  currentPosition = analogRead(POTIPIN);
+  int delta = currentPosition-target_pos;
 
 
   unsigned int timeDelta = millis() - lastMillis;
@@ -160,12 +163,8 @@ void serialEvent() {
   switch(currentDebugState){
     case MANUALMOTORCONTROLL:
       int dataIn = toInt(getDebugToken(inputString,0));
-      if(0<dataIn<=1023){
-        target_pos = dataIn;
-        changedtarget_pos = true;
-      }
-      else {
-        Serial.println("target_pos außerhalb des Messbereichs");
+      if(!setTargetPos(dataIn)){
+        Serial.println("target position outside allowed borders");
       }
       break;
     default:
@@ -245,8 +244,14 @@ void debugFunction() {
 
       switch(debugFunctionStep) {
         case 0:
+          //Move to lowest position
           setTargetPos(50);
-          
+          if(isAtTargetPos()) {
+            debugFunctionStep = 1;
+          }
+          break;
+        case 1:
+          setTargetPos();
       }
     default:
       //Do nothing
@@ -263,4 +268,8 @@ bool setTargetPos(int newTargetPos) {
   }
   //an error happend
   return false;
+}
+
+bool isAtTargetPos() {
+  return currentPosition>target_pos-TRIGGERTOLERANCE&&currentPosition<target_pos+TRIGGERTOLERANCE
 }
