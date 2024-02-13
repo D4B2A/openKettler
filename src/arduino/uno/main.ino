@@ -2,6 +2,8 @@
 #define PINA 3
 #define PINB 4
 #define POTIPIN A0
+#define ROT+PIN 5
+#define ROT-PIN 6
 
 #define TRIGGERTOLERANCE 20
 #define TRIGGERDELAY 500
@@ -11,6 +13,9 @@
 
 unsigned long lastMillis;
 int currentMotorState;
+int currentHeadUnitState;
+unsigned char brakeLevel;
+
 int currentPosition;
 int currentDebugState;
 String inputString;
@@ -30,12 +35,25 @@ enum debugState {
   AUTOMATICMOTORTEST
 };
 
+#define BRAKELEVEL 12
+#define LOWLIMIT 50
+#define HIGHLIMIT 500
+
 enum motorState {
   FORWARDS,
   FREERUNNING,
   STOPP,
   BACKWARDS
   };
+
+enum headUnitState {
+  BRAKELEVEL_SIMPLE,
+  BRAKELEVEL_COMPLEX,
+  TIME,
+  DISTANCE,
+  CALORIES
+};
+
 
 void setup() {
   //inti debug
@@ -61,7 +79,8 @@ void setup() {
   pinMode(PINA, OUTPUT);
   pinMode(PINB, OUTPUT);
   pinMode(POTIPIN, INPUT);
-  setMotorState(FORWARDS);
+  pinMode(ROT+PIN, INPUT);
+  pinMode(ROT-PIN, INPUT);
 
 
   currentPosition = analogRead(POTIPIN);
@@ -201,6 +220,46 @@ void setMotorState(int state) {
       }
     }
   }
+
+
+void updateBrakeLevel(unsigned char level) {
+  //12 Brake Level
+  //validate Level
+  if(level<=BRAKELEVEL) {
+    target_pos = map(level, 1, BRAKELEVEL, LOWLIMIT, HIGHLIMIT);
+  }
+}
+
+//BrakeLevel++
+ISR() {
+  //Validate Interrupt
+  if(digitalRead(ROT+PIN)) {
+    switch(currentHeadUnitState){
+      case BRAKELEVEL_SIMPLE:
+      if(brakeLevel<BRAKELEVEL){
+        brakeLevel += 1;
+      }
+      break;
+      default:
+      break;
+    }
+  }
+}
+
+//BrakeLevel--
+ISR() {
+  //Validate Interrupt
+  if(digitalRead(ROT-PIN)) {
+    switch(currentHeadUnitState) {
+      case: BRAKELEVEL_SIMPLE:
+      if(brakeLevel>0) {
+        brakeLevel -= 1;
+      }
+      break;
+    }
+  }
+  
+}
 
 String getDebugToken(String inputString, int TokenIndex) {
   int length = inputString.length();
