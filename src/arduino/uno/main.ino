@@ -15,16 +15,18 @@ int currentDebugState;
 String inputString;
 bool stringComplete;
 
-int sollWert;
+int debugFunctionStep;
+int target_pos;
 int lastCycle;
-bool changedSollWert;
+bool changedtarget_pos;
 
 #define TRIGGERTOLERANCE 50
 #define STOPTOLERANCE 20
 
 enum debugState {
   OFF,
-  MANUALMOTORCONTROLL
+  MANUALMOTORCONTROLL,
+  AUTOMATICMOTORTEST
 };
 
 enum motorState {
@@ -35,14 +37,16 @@ enum motorState {
   };
 
 void setup() {
+  //inti debug
   currentDebugState = OFF;
   inputString = "";
+  debugFunctionStep = 0;
 
-  // put your setup code here, to run once:
+
   currentMotorState = STOPP;
-  sollWert = 200;
+  target_pos = 200;
 
-  changedSollWert = true;
+  changedtarget_pos = true;
   lastMillis = millis();
   
   Serial.begin(9600);
@@ -67,13 +71,13 @@ void loop() {
 
 void updateMotor() {
   int istWert = analogRead(POTIPIN);
-  int delta = istWert-sollWert;
+  int delta = istWert-target_pos;
 
 
   unsigned int timeDelta = millis() - lastMillis;
   //Serial.println(delta);
 
-  if(changedSollWert) {
+  if(changedtarget_pos) {
     //change values to allow for trigger
     timeDelta += TRIGGERDELAY + 1;
     lastCycle += CYCLEDELAY + 1;
@@ -132,13 +136,21 @@ void serialEvent() {
     case "MANUALMOTORCONTROLL":
       //provide feedback
       if(currentDebugState != MANUALMOTORCONTROLL) {
-        Serial.println("Started MANUALMOTORCONTROLL");
+        Serial.println("Starting MANUALMOTORCONTROLL");
       }
       else {
         Serial.println("You're allready in MANUALMOTORCONTROLL");
       }
       currentDebugState = MANUALMOTORCONTROLL;
       break;
+    case: "AUTOMATICMOTORTEST":
+      if(currentDebugState!=AUTOMATICMOTORTEST){
+        Serial.println("Starting AUTOMATICMOTORTEST");
+      }
+      else {
+        Serial.println("You're allready in AUTOMATICMOTORTEST");
+      }
+      currentDebugState = AUTOMATICMOTORTEST;
     default:
       break;
   }
@@ -149,11 +161,11 @@ void serialEvent() {
     case MANUALMOTORCONTROLL:
       int dataIn = toInt(getDebugToken(inputString,0));
       if(0<dataIn<=1023){
-        sollWert = dataIn;
-        changedSollWert = true;
+        target_pos = dataIn;
+        changedtarget_pos = true;
       }
       else {
-        Serial.println("Sollwert außerhalb des Messbereichs");
+        Serial.println("target_pos außerhalb des Messbereichs");
       }
       break;
     default:
@@ -219,12 +231,36 @@ String getDebugToken(String inputString, int TokenIndex) {
 void debugFunction() {
   switch(currentDebugState) {
     case MANUALMOTORCONTROLL:
+      Serial.print("current position:");
       Serial.print(analogRead(POTIPIN));
-      Serial.print(",");
-      Serial.println(sollWert);
+      Serial.print(", target position:");
+      Serial.println(target_pos);
       break;
+    case AUTOMATICMOTORTEST:
+      //Send Serial Data
+      Serial.print("current position:");
+      Serial.print(analogRead(POTIPIN));
+      Serial.print(", target position:");
+      Serial.println(target_pos);
+
+      switch(debugFunctionStep) {
+        case 0:
+          setTargetPos(50);
+          
+      }
     default:
       //Do nothing
       break;
   }
+}
+
+bool setTargetPos(int newTargetPos) {
+  if(0<newTargetPos<1024) {
+    target_pos = newTargetPos;
+    changedtarget_pos = true;
+    //return true to indicate successful set
+    return true;
+  }
+  //an error happend
+  return false;
 }
