@@ -69,12 +69,6 @@ void setup() {
   inputString = "";
   debugFunctionStep = 0;
 
-
-  currentMotorState = STOPP;
-  target_pos = 200;
-
-  changedtarget_pos = true;
-  lastMillis = millis();
   
   Serial.begin(9600);
   Serial.setTimeout(10);
@@ -83,62 +77,15 @@ void setup() {
   
   Serial.begin(9600);
   Serial.setTimeout(10);
-  pinMode(ENABLEPIN, OUTPUT);
-  pinMode(PINA, OUTPUT);
-  pinMode(PINB, OUTPUT);
-  pinMode(POTIPIN, INPUT);
   pinMode(ROT+PIN, INPUT);
   pinMode(ROT-PIN, INPUT);
 
-
-  currentPosition = analogRead(POTIPIN);
 }
 
 void loop() {
   updateMotor();
   debugFunction();
 }
-
-void updateMotor() {
-  currentPosition = analogRead(POTIPIN);
-  int delta = currentPosition-target_pos;
-
-
-  unsigned int timeDelta = millis() - lastMillis;
-  //Serial.println(delta);
-
-  if(changedtarget_pos) {
-    //change values to allow for trigger
-    timeDelta += TRIGGERDELAY + 1;
-    lastCycle += CYCLEDELAY + 1;
-  }
-  
-  if(delta>TRIGGERTOLERANCE&&timeDelta>TRIGGERDELAY&&lastCycle>CYCLEDELAY) {
-    setMotorState(FORWARDS);
-  }
-  if(delta<-TRIGGERTOLERANCE&&timeDelta>TRIGGERDELAY&&lastCycle>CYCLEDELAY) {
-    setMotorState(BACKWARDS);  
-  }
-  if(delta<STOPTOLERANCE&&delta>-STOPTOLERANCE) {
-    lastMillis = millis();
-    setMotorState(STOPP);
-    lastCycle = 0;
-  }
-  else {
-    lastCycle += 1;
-  
-    if(delta>TRIGGERTOLERANCE) {
-      setMotorState(FORWARDS);
-    }
-    if(delta<-TRIGGERTOLERANCE) {
-      setMotorState(BACKWARDS);  
-    }
-    if(delta<STOPTOLERANCE&&delta>-STOPTOLERANCE) {
-      setMotorState(STOPP);
-    }
-  }
-}
-
 
 void serialEvent() {
   while(Serial.available) {
@@ -201,33 +148,6 @@ void serialEvent() {
 }
 
 
-void setMotorState(int state) {
-  if(currentMotorState!=state) {
-    currentMotorState = state;
-    //Serial.println(state);
-    //Switch into freerunning for change
-    digitalWrite(ENABLEPIN, LOW);
-    switch(state) {
-      case FORWARDS:
-      digitalWrite(PINA, LOW);
-      digitalWrite(PINB, HIGH);
-      digitalWrite(ENABLEPIN, HIGH);
-      break;
-      case STOPP:
-      digitalWrite(PINA, LOW);
-      digitalWrite(PINB, LOW);
-      digitalWrite(ENABLEPIN, HIGH);
-      break;
-      case BACKWARDS:
-      digitalWrite(PINA, HIGH);
-      digitalWrite(PINB, LOW);
-      digitalWrite(ENABLEPIN, HIGH);
-      break;
-      default:
-      break;
-      }
-    }
-  }
 
 
 void updateBrakeLevel(unsigned char level) {
@@ -345,20 +265,7 @@ void debugFunction() {
   }
 }
 
-bool setTargetPos(int newTargetPos) {
-  if(LOWLIMIT<newTargetPos<HIGHLIMIT) {
-    target_pos = newTargetPos;
-    changedtarget_pos = true;
-    //return true to indicate successful set
-    return true;
-  }
-  //an error happend
-  return false;
-}
 
-bool isAtTargetPos() {
-  return currentPosition>target_pos-TRIGGERTOLERANCE&&currentPosition<target_pos+TRIGGERTOLERANCE
-}
 
 void setTimeout(int timeout) {
   timeoutMillis = millis() + timeout;
