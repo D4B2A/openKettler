@@ -1,9 +1,18 @@
-#include"openkettler.h"
+#include<kettler.h>
 
 static int currentDebugState;
 static int debugFunctionStep;
 static String inputString;
 static bool stringComplete;
+static int currentError;
+
+
+static enum debugState {
+  OFF,
+  MANUALMOTORCONTROLL,
+  AUTOMATICMOTORTEST
+};
+
 
 static String getDebugToken(String inputString, int TokenIndex) {
   int length = inputString.length();

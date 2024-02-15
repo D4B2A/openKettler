@@ -1,9 +1,18 @@
+#include<kettler.h>
+
 static int currentMotorState;
 static int targetPos;
 static int currentPos;
 static bool changedTargetPos;
 static unsigned long lastMillis;
 static int lastCycle;
+
+static enum motorState {
+    FORWARDS,
+    FREERUNNING,
+    STOP,
+    BACKWARDS
+};
 
 
 void initMotor() {
