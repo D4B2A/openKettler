@@ -75,7 +75,7 @@ static void setMotorState(int state) {
     }
 }
 
-static int setTargetPos(int newTargetPos) {
+int setTargetPos(int newTargetPos) {
     if(LOWLIMIT<newTargetPos<HIGHLIMIT) {
         targetPos = newTargetPos;
         changedTargetPos = true;

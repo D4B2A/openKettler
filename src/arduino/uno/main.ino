@@ -13,27 +13,19 @@
 
 #define MOTORTIMEOUT 10000
 
-unsigned long lastMillis;
 unsigned long timeoutMillis;
-int currentMotorState;
 int currentHeadUnitState;
 unsigned char brakeLevel;
 
-int currentPosition;
 int currentDebugState;
 String inputString;
 bool stringComplete;
 
-int error;
+int currentError;
 int debugFunctionStep;
-int target_pos;
-int lastCycle;
-bool changedtarget_pos;
 
-#define TRIGGERTOLERANCE 50
-#define STOPTOLERANCE 20
 
-enum errorEnum {
+enum error {
   MOTORTIMEOUT
 };
 
@@ -44,15 +36,7 @@ enum debugState {
 };
 
 #define BRAKELEVEL 12
-#define LOWLIMIT 50
-#define HIGHLIMIT 500
 
-enum motorState {
-  FORWARDS,
-  FREERUNNING,
-  STOPP,
-  BACKWARDS
-  };
 
 enum headUnitState {
   BRAKELEVEL_SIMPLE,
