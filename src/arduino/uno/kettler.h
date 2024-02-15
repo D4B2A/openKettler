@@ -8,6 +8,11 @@
 #define LOWLIMIT 50;
 #define HIGHLIMIT 500;
 
+enum error {
+    STATUS_OK,
+    MOTORTIMEOUT
+};
+
 
 void updateMotor() {}
 void initMotor() {}
@@ -15,3 +20,7 @@ int setTargetPos(int newTargetPos) {}
 
 void initDebug() {}
 void debugFunction() {}
+
+int* setTimeout(int timeout) {}
+bool checkTimeout(int* timeout_ptr) {}
+void freeTimeout(int* timeout_ptr) {}

@@ -1,17 +1,9 @@
 #include<kettler.h>
 
 
-#define MOTORTIMEOUT 10000
-
-unsigned long timeoutMillis;
 int currentHeadUnitState;
 unsigned char brakeLevel;
 
-
-
-enum error {
-  MOTORTIMEOUT
-};
 
 #define BRAKELEVEL 12
 
