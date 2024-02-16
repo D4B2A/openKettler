@@ -30,3 +30,6 @@ void freeTimeout(int* timeout_ptr) {}
 void initBrakeLevel() {}
 void setBrakeLevel() {}
 unsigned char getBrakeLevel() {}
+
+void initHeadUnit() {}
+void updateHeadUnit() {}
