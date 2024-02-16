@@ -5,8 +5,10 @@
 #define CYCLEDELAY 5
 #define STOPTOLERANCE 10
 
-#define LOWLIMIT 50;
-#define HIGHLIMIT 500;
+#define LOWLIMIT 50
+#define HIGHLIMIT 500
+
+#define BRAKELEVEL 16
 
 enum error {
     STATUS_OK,
@@ -24,3 +26,7 @@ void debugFunction() {}
 int* setTimeout(int timeout) {}
 bool checkTimeout(int* timeout_ptr) {}
 void freeTimeout(int* timeout_ptr) {}
+
+void initBrakeLevel() {}
+void setBrakeLevel() {}
+unsigned char getBrakeLevel() {}

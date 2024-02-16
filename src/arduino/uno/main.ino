@@ -2,10 +2,6 @@
 
 
 int currentHeadUnitState;
-unsigned char brakeLevel;
-
-
-#define BRAKELEVEL 12
 
 
 enum headUnitState {
@@ -24,20 +20,12 @@ void setup() {
 
   initDebug();
   initMotor();
+  initBrakeLevel();
 }
 
 void loop() {
   updateMotor();
   debugFunction();
-}
-
-
-void updateBrakeLevel(unsigned char level) {
-  //12 Brake Level
-  //validate Level
-  if(level<=BRAKELEVEL) {
-    target_pos = map(level, 1, BRAKELEVEL, LOWLIMIT, HIGHLIMIT);
-  }
 }
 
 //BrakeLevel++
@@ -69,12 +57,4 @@ ISR() {
     }
   }
   
-}
-
-void setTimeout(int timeout) {
-  timeoutMillis = millis() + timeout;
-}
-
-bool checkTimeout() {
-  return timeoutMillis>millis();
 }
