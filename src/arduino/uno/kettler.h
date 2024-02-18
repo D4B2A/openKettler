@@ -49,6 +49,7 @@ void initHeadUnit() {}
 void updateHeadUnit() {}
 
 void initProgram() {}
+void getCurrentProgram() {}
 void quickStart() {}
 void resetTraining() {}
 void updateProgram() {}

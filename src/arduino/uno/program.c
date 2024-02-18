@@ -30,6 +30,12 @@ void updateProgram() {
 
 }
 
+unsigned char getCurrentTraining() {
+    return currentTraining
+}
+
+
+
 void registerRotation() {
     lastRotationMillis = currentRotationMillis;
     currentRotationMillis = millis();
