@@ -15,7 +15,4 @@ void initHeadUnit() {
 }
 
 void updateHeadUnit() {
-    switch currentHeadUnitState {
-
-    }
 }

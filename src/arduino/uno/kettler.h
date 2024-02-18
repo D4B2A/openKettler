@@ -10,9 +10,23 @@
 
 #define BRAKELEVEL 16
 
+enum speedUnit {
+    RPM,
+    KMH
+};
+
+
 enum error {
     STATUS_OK,
     MOTORTIMEOUT
+};
+
+enum training {
+    SELECTOR,
+    MANUAL,
+    PROGRAM,
+    PERSONAL,
+    HRC
 };
 
 
@@ -33,3 +47,14 @@ unsigned char getBrakeLevel() {}
 
 void initHeadUnit() {}
 void updateHeadUnit() {}
+
+void initProgram() {}
+void quickStart() {}
+void resetTraining() {}
+void updateProgram() {}
+unsigned int getTargetTrainingTime() {}
+unsigned int getTragetTrainingDistance() {}
+unsigned int getTragetTrainingKcal() {}
+unsigned int getRemainingTrainingTime() {}
+unsigned int getRemainingTrainingDistance() {}
+unsigned int getRemainingTrainingKcal() {}
