@@ -51,6 +51,23 @@ unsigned int getSpeed(bool unit) {
     }
 }
 
+void setTraining(unsigned char newTraining) {
+    currentTraining = newTraining;
+}
+
+
+void setTragetTrainingTime(unsigned int newTargetTrainingTime) {
+    targetTrainingTime = newTargetTrainingTime;
+}
+
+void setTargetTrainingDistance(unsigned int newTargetTrainingDistance) {
+    targetTrainingDistance = newTargetTrainingDistance;
+}
+
+void setTragetTrainingKcal(unsigned int newTargetTrainingKcal) {
+    targetTrainingKcal = newTargetTrainingKcal
+}
+
 //get Target
 unsigned int getTargetTrainingTime() {
     return targetTrainingTime;

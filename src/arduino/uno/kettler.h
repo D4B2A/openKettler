@@ -10,6 +10,9 @@
 
 #define BRAKELEVEL 16
 
+#define DISPLAY "I2C-LCD"
+
+
 enum speedUnit {
     RPM,
     KMH
