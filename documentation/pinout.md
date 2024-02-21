@@ -28,11 +28,11 @@ This file contains the different pinouts for all wire to board connections.
 ## MOD ENC
 | Pin Number | Function |
 | --- | --- |
-| 1 | Unknown |
-| 2 | Unknown |
-| 3 | Unknown |
-| 4 | Unknown |
-| 5 | Unknown |
+| 1 | Rot1 |
+| 2 | GND |
+| 3 | Rot2 |
+| 4 | Button |
+| 5 | Button |
 
 ## KEY2
 | Pin Number | Function |
