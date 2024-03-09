@@ -1,4 +1,4 @@
-#include <wiring.h>
+#include "wiring.h"
 
 #define TRIGGERTOLERANCE 20
 #define TRIGGERDELAY 200
@@ -30,32 +30,32 @@ enum training {
 };
 
 
-void updateMotor() {}
-void initMotor() {}
-int setTargetPos(int newTargetPos) {}
+void updateMotor();
+void initMotor();
+int setTargetPos(int);
 
-void initDebug() {}
-void debugFunction() {}
+void initDebug();
+void debugFunction();
 
-int* setTimeout(int timeout) {}
-bool checkTimeout(int* timeout_ptr) {}
-void freeTimeout(int* timeout_ptr) {}
+int* setTimeout(int);
+bool checkTimeout(int*);
+void freeTimeout(int*);
 
-void initBrakeLevel() {}
-void setBrakeLevel() {}
-unsigned char getBrakeLevel() {}
+void initBrakeLevel();
+void setBrakeLevel();
+unsigned char getBrakeLevel();
 
-void initHeadUnit() {}
-void updateHeadUnit() {}
+void initHeadUnit();
+void updateHeadUnit();
 
-void initProgram() {}
-void getCurrentProgram() {}
-void quickStart() {}
-void resetTraining() {}
-void updateProgram() {}
-unsigned int getTargetTrainingTime() {}
-unsigned int getTragetTrainingDistance() {}
-unsigned int getTragetTrainingKcal() {}
-unsigned int getRemainingTrainingTime() {}
-unsigned int getRemainingTrainingDistance() {}
-unsigned int getRemainingTrainingKcal() {}
+void initProgram();
+void getCurrentProgram();
+void quickStart();
+void resetTraining();
+void updateProgram();
+unsigned int getTargetTrainingTime();
+unsigned int getTragetTrainingDistance();
+unsigned int getTragetTrainingKcal();
+unsigned int getRemainingTrainingTime();
+unsigned int getRemainingTrainingDistance();
+unsigned int getRemainingTrainingKcal();
